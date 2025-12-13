@@ -1,0 +1,30 @@
+{
+  "name": "back-end",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@fastify/jwt": "^10.0.0",
+    "@fastify/swagger": "^7.5.1",
+    "@prisma/adapter-pg": "^7.1.0",
+    "@prisma/client": "^7.1.0",
+    "bcryptjs": "^3.0.3",
+    "fastify": "^5.6.2",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.16.3",
+    "tsx": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.0.1",
+    "dotenv": "^17.2.3",
+    "prisma": "^7.1.0"
+  }
+}
