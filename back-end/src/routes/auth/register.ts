@@ -25,6 +25,24 @@ export const registerUser = async (req: FastifyRequest, reply: FastifyReply) => 
       passwordHash: hashedPassword,
     },
   });
+  if (!res) {
+    return reply.status(500).send({ error: 'Error creating user' });
+  }
+  await prisma.subscription.create({
+    data: {
+      userId: res.id,
+      plan: 'BASIC',
+      expiresAt: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+    },
+  });
+
+  await prisma.usage.create({
+    data: {
+      userId: res.id,
+      requestsCount: 0,
+      projectsCount: 0,
+    },
+  });
 
   return res;
 };

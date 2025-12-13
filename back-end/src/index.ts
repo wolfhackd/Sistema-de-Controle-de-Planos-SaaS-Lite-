@@ -3,6 +3,7 @@ import { prisma } from '../prisma.js';
 import { authRoutes } from './routes/auth/route.js';
 import fastifySwagger from '@fastify/swagger';
 import fastifyJwt from '@fastify/jwt';
+import { userRoutes } from './routes/user/route.js';
 const fastify = Fastify({
   logger: true,
 });
@@ -14,6 +15,7 @@ fastify.register(fastifyJwt, {
 
 //Routes
 fastify.register(authRoutes, { prefix: '/auth' });
+fastify.register(userRoutes, { prefix: '/user' });
 
 try {
   await fastify.listen({ port: 3000 });
