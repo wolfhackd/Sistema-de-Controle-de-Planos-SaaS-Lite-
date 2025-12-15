@@ -21,7 +21,7 @@ export const downgradePlan = async (req: FastifyRequest, reply: FastifyReply) =>
     } else if (subscription.plan === 'ENTERPRISE') {
       newPlan = 'PRO';
     } else {
-      return reply.status(400).send({ error: 'Your plan is already ENTERPRISE' });
+      return reply.status(400).send({ error: 'Your plan is already BASIC' });
     }
     const updatedSubscription = await prisma.subscription.update({
       where: { userId },

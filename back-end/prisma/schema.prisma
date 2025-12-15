@@ -17,6 +17,7 @@ model User {
   usage        Usage?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  projects     Project[]
 }
 
 model Subscription {
@@ -36,6 +37,13 @@ model Usage {
   requestsCount Int      @default(0)
   projectsCount Int      @default(0)
   lastReset     DateTime @default(now())
+}
+
+model Project {
+  id     String @id @default(cuid())
+  name   String
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
 }
 
 enum PlanType {

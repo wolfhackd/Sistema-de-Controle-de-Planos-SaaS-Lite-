@@ -23,8 +23,6 @@ type DashboardResponse = {
 
 export const dashboard = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
-    await req.jwtVerify();
-
     const userId = req.user.sub;
 
     const user = await prisma.user.findUnique({
