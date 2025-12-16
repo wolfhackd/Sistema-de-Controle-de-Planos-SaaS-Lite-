@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../../../prisma.js';
 import bcrypt from 'bcryptjs';
+import { PlanType } from '../../generated/prisma/client.js';
 
 interface RegisterBody {
   name: string;
@@ -31,7 +32,7 @@ export const registerUser = async (req: FastifyRequest, reply: FastifyReply) => 
   await prisma.subscription.create({
     data: {
       userId: res.id,
-      plan: 'BASIC',
+      plan: PlanType.BASIC,
       expiresAt: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
     },
   });

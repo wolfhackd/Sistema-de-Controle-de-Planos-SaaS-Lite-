@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../../../prisma.js';
+import { PlanType } from '../../generated/prisma/client.js';
 
 export const upgradePlan = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
@@ -14,15 +15,19 @@ export const upgradePlan = async (req: FastifyRequest, reply: FastifyReply) => {
       return reply.status(404).send({ error: 'Subscription not found' });
     }
 
-    let newPlan: 'PRO' | 'ENTERPRISE';
+    let newPlan: PlanType;
 
-    if (subscription.plan === 'BASIC') {
-      newPlan = 'PRO';
-    } else if (subscription.plan === 'PRO') {
-      newPlan = 'ENTERPRISE';
-    } else {
-      return reply.status(400).send({ error: 'Your plan is already ENTERPRISE' });
+    switch (subscription.plan) {
+      case PlanType.BASIC:
+        newPlan = PlanType.PRO;
+        break;
+      case PlanType.PRO:
+        newPlan = PlanType.ENTERPRISE;
+        break;
+      default:
+        return reply.status(400).send({ error: 'Your plan is already ENTERPRISE' });
     }
+
     const updatedSubscription = await prisma.subscription.update({
       where: { userId },
       data: {

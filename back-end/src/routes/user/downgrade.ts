@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../../../prisma.js';
+import { PlanType } from '../../generated/prisma/enums.js';
 
 export const downgradePlan = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
@@ -14,15 +15,19 @@ export const downgradePlan = async (req: FastifyRequest, reply: FastifyReply) =>
       return reply.status(404).send({ error: 'Subscription not found' });
     }
 
-    let newPlan: 'BASIC' | 'PRO';
+    let newPlan: PlanType;
 
-    if (subscription.plan === 'PRO') {
-      newPlan = 'BASIC';
-    } else if (subscription.plan === 'ENTERPRISE') {
-      newPlan = 'PRO';
-    } else {
-      return reply.status(400).send({ error: 'Your plan is already BASIC' });
+    switch (subscription.plan) {
+      case PlanType.PRO:
+        newPlan = PlanType.BASIC;
+        break;
+      case PlanType.ENTERPRISE:
+        newPlan = PlanType.PRO;
+        break;
+      default:
+        return reply.status(400).send({ error: 'Your plan is already BASIC' });
     }
+
     const updatedSubscription = await prisma.subscription.update({
       where: { userId },
       data: {
