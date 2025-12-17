@@ -1,6 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../../../prisma.js';
-import type { use } from 'react';
 
 type DashboardResponse = {
   plan: 'BASIC' | 'PRO' | 'ENTERPRISE';
@@ -13,13 +12,6 @@ type DashboardResponse = {
     requests: number;
   };
 };
-
-//aplicar limites aqui
-// BASIC: 1.000 requisições/mês, 3 projetos
-
-// PRO: 10.000 requisições/mês, 50 projetos
-
-// ENTERPRISE: sem limite (ou limites altos personalizáveis)
 
 export const dashboard = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
