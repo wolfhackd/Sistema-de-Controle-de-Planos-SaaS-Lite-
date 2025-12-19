@@ -16,6 +16,15 @@ export const registerUser = async (req: FastifyRequest, reply: FastifyReply) => 
     return reply.status(400).send({ error: 'Name, email and password are required' });
   }
 
+  const user = await prisma.user.findFirst({
+    where: {
+      email,
+    },
+  });
+  if (user) {
+    return reply.status(400).send({ error: 'User already exists' });
+  }
+
   const salt = bcrypt.genSaltSync(10);
   const hashedPassword = bcrypt.hashSync(password, salt);
 
@@ -29,19 +38,25 @@ export const registerUser = async (req: FastifyRequest, reply: FastifyReply) => 
   if (!res) {
     return reply.status(500).send({ error: 'Error creating user' });
   }
-  await prisma.subscription.create({
-    data: {
-      userId: res.id,
-      plan: PlanType.BASIC,
-      expiresAt: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-    },
-  });
+  await prisma.subscription
+    .create({
+      data: {
+        userId: res.id,
+        plan: PlanType.BASIC,
+        expiresAt: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+      },
+    })
+    .catch(() => {
+      return reply.status(500).send({ error: 'Error creating subscription' });
+    });
 
   await prisma.usage.create({
     data: {
       userId: res.id,
       requestsCount: 0,
       projectsCount: 0,
+      year: new Date().getFullYear(),
+      month: new Date().getMonth() + 1,
     },
   });
 

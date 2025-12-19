@@ -37,6 +37,10 @@ model Usage {
   requestsCount Int      @default(0)
   projectsCount Int      @default(0)
   lastReset     DateTime @default(now())
+  year          Int
+  month         Int
+
+  @@unique([userId, year, month])
 }
 
 model Project {
