@@ -1,35 +1,15 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../../../prisma.js';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { meService } from '../../services/auth/meService.js';
 
 export const me = async (req: FastifyRequest, reply: FastifyReply) => {
-  await req.jwtVerify();
-
   try {
-    // 🔐 valida token (assinatura + expiração)
-    await req.jwtVerify();
-
-    const userId = (req.user as any).sub;
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        subscription: true,
-      },
-    });
-
-    if (!user) {
-      return reply.status(401).send({ error: 'Unauthorized' });
+    const res = await meService({ userId: req.user.sub as any });
+    reply.send(res);
+  } catch (err: any) {
+    if (err.message === 'User not found') {
+      return reply.status(404).send({ error: 'User not found' });
     }
-
-    return reply.send({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      plan: user.subscription?.plan ?? 'BASIC',
-    });
-  } catch {
-    return reply.status(401).send({ error: 'Unauthorized' });
+    return reply.status(500).send({ error: 'Internal server error' });
   }
 };

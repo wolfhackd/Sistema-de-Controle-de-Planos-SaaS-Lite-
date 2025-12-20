@@ -5,7 +5,7 @@ import { me } from './me.js';
 import { authMiddleware } from '../../middleware/auth.js';
 
 export const authRoutes = (app: FastifyInstance) => {
-  app.post('/register', registerUser);
-  app.post('/login', loginUser);
-  app.get('/me', { preHandler: authMiddleware }, me);
+  app.post('/register', registerUser); //Reprojetado falta testar
+  app.post('/login', loginUser); //Reprojetado falta testar
+  app.get('/me', { preHandler: authMiddleware }, me); //Reprojetado falta testar
 };

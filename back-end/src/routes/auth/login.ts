@@ -1,34 +1,23 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../../../prisma.js';
 import bcrypt from 'bcryptjs';
-
-interface LoginBody {
-  email: string;
-  password: string;
-}
+import { loginUserService, type LoginBodyInput } from '../../services/auth/loginUserService.js';
 
 export const loginUser = async (req: FastifyRequest, reply: FastifyReply) => {
-  const { email, password } = req.body as LoginBody;
-
-  if (!email || !password) {
-    return reply.status(400).send({ error: 'Email and password are required' });
+  try {
+    const res = await loginUserService(req.body as LoginBodyInput);
+    const token = await req.server.jwt.sign({ sub: res.userId }, { expiresIn: '1d' });
+    reply.send({ token });
+  } catch (err: any) {
+    if (err.message === 'Empty email or password') {
+      return reply.status(400).send({ error: 'Email and password are required' });
+    }
+    if (err.message === 'User not found') {
+      return reply.status(404).send({ error: 'User not found' });
+    }
+    if (err.message === 'Invalid password') {
+      return reply.status(401).send({ error: 'Invalid password' });
+    }
+    return reply.status(500).send({ error: 'Internal server error' });
   }
-  const user = await prisma.user.findFirst({
-    where: {
-      email,
-    },
-  });
-  if (!user) {
-    return reply.status(404).send({ error: 'User not found' });
-  }
-
-  const hashedPassword = bcrypt.compareSync(password, user.passwordHash);
-
-  if (!hashedPassword) {
-    return reply.status(401).send({ error: 'Invalid password' });
-  }
-
-  const token = req.server.jwt.sign({ sub: user.id }, { expiresIn: '1d' });
-
-  return { token };
 };

@@ -1,64 +1,21 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { prisma } from '../../../prisma.js';
-import bcrypt from 'bcryptjs';
-import { PlanType } from '../../generated/prisma/client.js';
-
-interface RegisterBody {
-  name: string;
-  email: string;
-  password: string;
-}
+import {
+  registerUserService,
+  type RegisterUserInput,
+} from '../../services/auth/registerUserService.js';
 
 export const registerUser = async (req: FastifyRequest, reply: FastifyReply) => {
-  const { name, email, password } = req.body as RegisterBody;
+  const { name, email, password } = req.body as RegisterUserInput;
 
-  if (!name || !email || !password) {
-    return reply.status(400).send({ error: 'Name, email and password are required' });
+  try {
+    const user = await registerUserService(req.body as RegisterUserInput);
+  } catch (err: any) {
+    if (err.message === 'MISSING_FIELDS') {
+      return reply.status(400).send({ error: 'Name, email and password are required' });
+    }
+    if (err.message === 'USER_ALREADY_EXISTS') {
+      return reply.status(400).send({ error: 'User already exists' });
+    }
+    return reply.status(500).send({ error: 'Internal server error' });
   }
-
-  const user = await prisma.user.findFirst({
-    where: {
-      email,
-    },
-  });
-  if (user) {
-    return reply.status(400).send({ error: 'User already exists' });
-  }
-
-  const salt = bcrypt.genSaltSync(10);
-  const hashedPassword = bcrypt.hashSync(password, salt);
-
-  const res = await prisma.user.create({
-    data: {
-      name,
-      email,
-      passwordHash: hashedPassword,
-    },
-  });
-  if (!res) {
-    return reply.status(500).send({ error: 'Error creating user' });
-  }
-  await prisma.subscription
-    .create({
-      data: {
-        userId: res.id,
-        plan: PlanType.BASIC,
-        expiresAt: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-      },
-    })
-    .catch(() => {
-      return reply.status(500).send({ error: 'Error creating subscription' });
-    });
-
-  await prisma.usage.create({
-    data: {
-      userId: res.id,
-      requestsCount: 0,
-      projectsCount: 0,
-      year: new Date().getFullYear(),
-      month: new Date().getMonth() + 1,
-    },
-  });
-
-  return res;
 };
