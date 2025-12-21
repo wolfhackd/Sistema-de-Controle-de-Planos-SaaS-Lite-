@@ -1,55 +1,11 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../../../prisma.js';
-
-type DashboardResponse = {
-  plan: 'BASIC' | 'PRO' | 'ENTERPRISE';
-  limits: {
-    projects: number;
-    requests: number;
-  };
-  usage: {
-    projects: number;
-    requests: number;
-  };
-};
+import { dashboardService } from '../../services/user/dashboardService.js';
 
 export const dashboard = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
     const userId = req.user.sub;
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        subscription: true,
-        usage: true,
-      },
-    });
-
-    if (!user || !user.subscription) {
-      return reply.status(401).send({ error: 'Unauthorized' });
-    }
-
-    const plan = user.subscription.plan;
-
-    const planLimits = {
-      BASIC: { requests: 1000, projects: 3 },
-      PRO: { requests: 10000, projects: 50 },
-      ENTERPRISE: { requests: Infinity, projects: Infinity },
-    } as const;
-
-    const limit = planLimits[plan];
-
-    const response: DashboardResponse = {
-      plan,
-      limits: {
-        projects: limit.projects,
-        requests: limit.requests,
-      },
-      usage: {
-        projects: user.usage?.projectsCount ?? 0,
-        requests: user.usage?.requestsCount ?? 0,
-      },
-    };
+    const response = await dashboardService(userId);
 
     return reply.send(response);
   } catch {
