@@ -17,6 +17,6 @@ export async function meService(data: { userId: string }) {
     id: user.id,
     name: user.name,
     email: user.email,
-    plan: user.subscription?.plan ?? 'BASIC',
+    plan: user.subscription?.plan ?? 'BASIC', // Default to BASIC if subscription is not found
   };
 }

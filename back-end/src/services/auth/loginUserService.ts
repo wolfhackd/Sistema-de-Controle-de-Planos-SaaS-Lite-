@@ -13,7 +13,7 @@ export async function loginUserService(data: LoginBodyInput) {
     // return reply.status(400).send({ error: 'Email and password are required' });
     throw new Error('Empty email or password');
   }
-  const user = await prisma.user.findFirst({
+  const user = await prisma.user.findUnique({
     where: {
       email,
     },
