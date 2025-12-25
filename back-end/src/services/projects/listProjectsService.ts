@@ -10,9 +10,13 @@ export async function listProjectsService(userId: string) {
     },
   });
 
+  if (!user) {
+    throw new Error('User not found');
+  }
+
   if (!user?.projects) {
     throw new Error('Projects not found');
   }
 
-  return user;
+  return user.projects;
 }

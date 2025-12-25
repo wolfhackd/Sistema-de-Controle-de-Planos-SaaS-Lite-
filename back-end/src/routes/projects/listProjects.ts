@@ -1,27 +1,11 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { prisma } from '../../../prisma.js';
 import { listProjectsService } from '../../services/projects/listProjectsService.js';
 
 export const listProject = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
     const userId = req.user.sub;
 
-    // const user = await prisma.user.findUnique({
-    //   where: {
-    //     id: userId,
-    //   },
-    //   include: {
-    //     projects: true,
-    //   },
-    // });
-
-    // if (!user) {
-    //   return reply.status(404).send({ error: 'User not found' });
-    // }
-    // if (!user.projects) {
-    //   return reply.status(404).send({ error: 'Projects not found' });
-    // }
-
+    console.log(userId);
     const res = await listProjectsService(userId);
 
     reply.send(res);
